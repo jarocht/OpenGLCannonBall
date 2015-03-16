@@ -61,7 +61,9 @@ float cannon_y = 0;
 float x_init = 0;
 float y_init = 0;
 
-bool animate = true;
+bool animateCannon = false;
+bool animateBall = false;
+bool animate = false;
 bool end_trajectory = false;
 
 static float COPPER_AMBIENT[] = {0.191250, 0.073500, 0.022500, 1.000000};
@@ -106,43 +108,47 @@ void simulate()
     float delta, current;
 
     current = glfwGetTime();
-    if (animate) {
+    if(animate) {
         delta = current - last_timestamp;
-        if (cannon_x < 10 && cannon_x >= -10){
-            cannon_cf = glm::translate(glm::vec3{cannon_x,0,0});
-            cannon_cf *= glm::rotate(cannon_angle, glm::vec3{0,1,0});
-            cannon_x += cannon_speed*delta;
-            if ( cannon_x >= 10){
-                cannon_speed = -2;
-                cannon_x = 9.9;
-            }
-            else if ( cannon_x <= -10){
-                cannon_speed = 2;
-                cannon_x = -9.9;
+        if (animateCannon) {
+            if (cannon_x < 10 && cannon_x >= -10) {
+                cannon_cf = glm::translate(glm::vec3{cannon_x, 0, 0});
+                cannon_cf *= glm::rotate(cannon_angle, glm::vec3{0, 1, 0});
+                cannon_x += cannon_speed * delta;
+                if (cannon_x >= 10) {
+                    cannon_speed = -2;
+                    cannon_x = 9.9;
+                }
+                else if (cannon_x <= -10) {
+                    cannon_speed = 2;
+                    cannon_x = -9.9;
+                }
             }
         }
-        if (!end_trajectory) {
+        if (animateBall) {
+            if (!end_trajectory) {
 
-            z_position += ball_speed*cos(launch_angle)*delta;
-            if (ball_speed > 0)
-                x_position += ball_speed*sin(launch_angle)*delta;
-            else
-                x_position -= ball_speed*sin(launch_angle)*delta;
-            //ball_cf = launch_cf;
-            ball_cf = glm::translate(glm::vec3{x_position+x_init, y_init, z_position});
-            ball_speed -= delta*gravity;
-            if ( z_position < 0)
-                end_trajectory = true;
+                z_position += ball_speed * cos(launch_angle) * delta;
+                if (ball_speed > 0)
+                    x_position += ball_speed * sin(launch_angle) * delta;
+                else
+                    x_position -= ball_speed * sin(launch_angle) * delta;
+                //ball_cf = launch_cf;
+                ball_cf = glm::translate(glm::vec3{x_position + x_init, y_init, z_position});
+                ball_speed -= delta * gravity;
+                if (z_position < 0)
+                    end_trajectory = true;
 
-        } else {
-            launch_angle = cannon_angle;
-            ball_cf = cannon_cf * glm::translate(glm::vec3{0,0,3});
-            end_trajectory = false;
-            x_init = cannon_x;
-            y_init = cannon_y;
-            z_position = 0;
-            x_position = 0;
-            ball_speed = 4.0;
+            } else {
+                launch_angle = cannon_angle;
+                ball_cf = cannon_cf * glm::translate(glm::vec3{0, 0, 3});
+                end_trajectory = false;
+                x_init = cannon_x;
+                y_init = cannon_y;
+                z_position = 0;
+                x_position = 0;
+                ball_speed = 4.0;
+            }
         }
     }
     last_timestamp = current;
@@ -358,6 +364,12 @@ void key_handler (GLFWwindow *win, int key, int scan_code, int action, int mods)
                 break;
             case GLFW_KEY_SPACE:
                 animate ^= true;
+                break;
+            case GLFW_KEY_LEFT_ALT:
+                animateBall ^= true;
+                break;
+            case GLFW_KEY_RIGHT_ALT:
+                animateCannon ^= true;
                 break;
             case GLFW_KEY_L:
                 camera_cf *= glm::translate(glm::vec3{-1,0,0});
